@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DARA Electronics | Premium Магазин</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary: #2563eb;
+            --dark: #0f172a;
+            --light: #f8fafc;
+            --border: #e2e8f0;
+            --success: #10b981;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background: var(--light); color: var(--dark); overflow-x: hidden; scroll-behavior: smooth; }
+
+        header {
+            background: white; padding: 15px 5%; position: sticky; top: 0; z-index: 1000;
+            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .logo { font-size: 28px; font-weight: 900; letter-spacing: -1px; cursor: pointer; color: var(--dark); }
+        .nav-links { list-style: none; display: flex; gap: 25px; }
+        .nav-links a { text-decoration: none; color: var(--dark); font-weight: 600; cursor: pointer; transition: 0.2s; }
+        .nav-links a:hover, .nav-links a.active { color: var(--primary); }
+        
+        .nav-icons { display: flex; gap: 20px; align-items: center; }
+        .icon-btn { font-size: 1.3rem; cursor: pointer; position: relative; transition: 0.3s; }
+        #cart-count {
+            position: absolute; top: -8px; right: -10px; background: #ff3e3e;
+            color: white; font-size: 10px; padding: 2px 6px; border-radius: 10px;
+        }
+
+        /* ОБНОВЛЕННЫЙ ШАБЛОН ДЛЯ ХЕРО-СЕКЦИИ */
+        .hero {
+            height: 400px; 
+            background: radial-gradient(circle at 80% 20%, #1e3a8a 0%, #0f172a 100%);
+            color: white;
+            display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;
+            position: relative;
+            overflow: hidden;
+            padding: 0 20px;
+        }
+        .hero::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(rgba(15, 23, 42, 0) 0%, #0f172a 100%), 
+                        linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px),
+                        linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 100% 100%, 40px 40px, 40px 40px;
+            opacity: 0.8;
+        }
+        .hero h1 { font-size: 4rem; font-weight: 900; margin-bottom: 15px; letter-spacing: 2px; position: relative; text-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+        .hero p { font-size: 1.2rem; opacity: 0.9; position: relative; font-weight: 300; }
+
+        /* СТРУКТУРА СТРАНИЦ (SPA) */
+        .page { display: none; animation: fadeIn 0.4s ease-in-out forwards; }
+        .page.active { display: block; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .container { padding: 40px 5%; }
+        .section-title { font-size: 2rem; margin-bottom: 30px; border-left: 5px solid var(--primary); padding-left: 15px; }
+
+        /* СЕТКА ТОВАРОВ */
+        .product-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
+            gap: 25px; 
+            min-height: 400px;
+        }
+
+        .product-card {
+            background: white; border-radius: 15px; padding: 20px;
+            border: 1px solid var(--border); transition: 0.3s;
+            display: flex; flex-direction: column;
+            cursor: pointer;
+        }
+        .product-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
+        .product-card img { width: 100%; height: 200px; object-fit: contain; margin-bottom: 15px; }
+        .product-card h3 { font-size: 1.1rem; margin-bottom: 10px; flex-grow: 1; color: var(--dark); }
+        .price { font-size: 1.4rem; font-weight: bold; color: var(--primary); margin-bottom: 15px; }
+
+        /* УПРАВЛЕНИЕ ЦВЕТОМ В КАРТОЧКЕ */
+        .color-selector { display: flex; gap: 8px; margin-bottom: 15px; align-items: center; }
+        .color-label { font-size: 0.85rem; color: #64748b; margin-right: 4px; }
+        .color-dot { 
+            width: 18px; height: 18px; border-radius: 50%; border: 2px solid transparent; 
+            cursor: pointer; transition: 0.2s; 
+        }
+        .color-dot.active { border-color: var(--dark); transform: scale(1.15); }
+
+        .add-btn {
+            background: var(--dark); color: white; border: none; padding: 12px;
+            border-radius: 8px; cursor: pointer; font-weight: 600; width: 100%; transition: 0.3s;
+        }
+        .add-btn:hover { background: var(--primary); }
+
+        /* СТИЛИ СТРАНИЦЫ «О НАС» */
+        .about-hero { background: white; padding: 40px; border-radius: 20px; border: 1px solid var(--border); margin-bottom: 40px; }
+        .about-text { font-size: 1.1rem; line-height: 1.7; color: #334155; margin-bottom: 20px; }
+        
+        .team-section { margin-top: 40px; }
+        .team-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-top: 20px; }
+        .team-card { background: white; border: 1px solid var(--border); padding: 25px; border-radius: 15px; text-align: center; transition: 0.3s; }
+        .team-card:hover { border-color: var(--primary); transform: translateY(-3px); }
+        .team-avatar { width: 70px; height: 70px; background: #eff6ff; color: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px; font-size: 1.8rem; }
+        .team-card h4 { font-size: 1.2rem; margin-bottom: 5px; color: var(--dark); }
+        .team-card p { font-size: 0.9rem; color: #64748b; font-weight: 500; }
+
+        /* НОВЫЙ БЛОК КОНТАКТОВ */
+        .contact-block {
+            margin-top: 40px;
+            background: white;
+            border: 1px solid var(--border);
+            padding: 30px;
+            border-radius: 15px;
+        }
+        .contact-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            margin-top: 15px;
+        }
+        .contact-item-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: var(--dark);
+            font-size: 1.1rem;
+            font-weight: 600;
+            transition: 0.2s;
+        }
+        .contact-item-link i {
+            font-size: 1.5rem;
+        }
+        .contact-item-link.insta-link:hover { color: #e1306c; }
+        .contact-item-link.phone-link:hover { color: var(--primary); }
+
+        /* КОРЗИНА */
+        .cart-panel {
+            position: fixed; top: 0; right: -400px; width: 380px; height: 100%;
+            background: white; z-index: 2000; box-shadow: -5px 0 15px rgba(0,0,0,0.1);
+            transition: 0.4s ease; padding: 30px; display: flex; flex-direction: column;
+        }
+        .cart-panel.active { right: 0; }
+        .cart-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+        .cart-item-info { display: flex; flex-direction: column; gap: 4px; max-width: 75%; }
+        .cart-item-name { font-size: 0.95rem; font-weight: 500; }
+        .cart-item-color { font-size: 0.8rem; color: #64748b; }
+        .cart-item-price { font-size: 0.9rem; color: #666; }
+        .cart-item-remove { background: none; border: none; color: #ef4444; font-size: 1.4rem; cursor: pointer; padding: 0 5px; transition: 0.2s; line-height: 1; }
+        .cart-item-remove:hover { color: #dc2626; transform: scale(1.15); }
+
+        /* МУЛЬТИ-МОДАЛЬНЫЙ СЛОЙ */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6); z-index: 3000; display: none;
+            justify-content: center; align-items: center; backdrop-filter: blur(4px);
+        }
+        .modal-content { background: white; padding: 30px; border-radius: 20px; width: 90%; max-width: 500px; position: relative; animation: modalSlid 0.3s ease; }
+        
+        @keyframes modalSlid {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .close-x { position: absolute; top: 15px; right: 20px; font-size: 24px; cursor: pointer; color: #999; transition: 0.2s; }
+        .close-x:hover { color: #333; }
+
+        .details-img { width: 100%; height: 230px; object-fit: contain; margin-bottom: 20px; }
+        .details-props { margin: 15px 0; background: var(--light); padding: 15px; border-radius: 10px; }
+        .prop-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px dashed #cbd5e1; font-size: 0.95rem; }
+        .prop-row:last-child { border: none; }
+        .prop-label { color: #64748b; }
+        .prop-value { font-weight: 600; color: var(--dark); }
+
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-size: 14px; font-weight: bold; }
+        .form-group input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; }
+        .total-box { font-size: 1.2rem; font-weight: bold; margin-bottom: 20px; }
+        .btn-main { background: var(--dark); color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: 600; width: 100%; transition: 0.3s; }
+        .btn-success { background: var(--success); }
+        .btn-success:hover { opacity: 0.9; }
+
+        /* СЕКЦИЯ FAQ (Аккордеон) */
+        .faq-section { margin-top: 60px; }
+        .faq-item { background: white; border: 1px solid var(--border); border-radius: 10px; margin-bottom: 12px; overflow: hidden; transition: 0.3s; }
+        .faq-question { padding: 18px 20px; font-weight: 600; display: flex; justify-content: space-between; align-items: center; cursor: pointer; user-select: none; }
+        .faq-question i { transition: 0.3s; color: var(--primary); }
+        .faq-answer { max-height: 0; padding: 0 20px; color: #475569; overflow: hidden; transition: 0.3s ease-out; font-size: 0.95rem; line-height: 1.6; }
+        .faq-item.active { border-color: var(--primary); box-shadow: 0 4px 12px rgba(37,99,235,0.05); }
+        .faq-item.active .faq-question i { transform: rotate(180deg); }
+        .faq-item.active .faq-answer { padding-bottom: 18px; max-height: 200px; }
+
+        /* ФУТЕР С КОНТАКТАМИ */
+        footer { 
+            padding: 40px 5%; 
+            background: var(--dark); 
+            color: white; 
+            margin-top: 60px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+        .footer-contacts {
+            display: flex;
+            gap: 20px;
+        }
+        .footer-contacts a {
+            color: #94a3b8;
+            text-decoration: none;
+            transition: 0.2s;
+            font-size: 0.95rem;
+        }
+        .footer-contacts a:hover {
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo" onclick="switchPage('catalog')">DARA</div>
+        <ul class="nav-links">
+            <li><a id="nav-catalog" class="active" onclick="switchPage('catalog')">Каталог</a></li>
+            <li><a id="nav-about" onclick="switchPage('about')">О нас</a></li>
+        </ul>
+        <div class="nav-icons">
+            <div class="icon-btn" onclick="toggleCart()">
+                <i class="fas fa-shopping-bag"></i>
+                <span id="cart-count">0</span>
+            </div>
+        </div>
+    </header>
+
+    <div id="page-catalog" class="page active">
+        <section class="hero">
+            <h1>DARA ELECTRONICS</h1>
+            <p>Качество, проверенное временем</p>
+        </section>
+
+        <div class="container">
+            <h2 class="section-title">Наши товары</h2>
+            <div class="product-grid" id="main-grid"></div>
+
+            <section class="faq-section">
+                <h2 class="section-title">Часто задаваемые вопросы (FAQ)</h2>
+                
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        <span>Как быстро осуществляется доставка по Казахстану?</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        Доставка по городу Алматы осуществляется в день заказа. В другие регионы Казахстана (Астана, Шымкент, Караганда и др.) экспресс-доставка занимает от 2 до 4 рабочих дней.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        <span>Предоставляется ли официальная гарантия на устройства DARA?</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        Да, абсолютно на всю технику нашего бренда распространяется официальная фирменная гарантия сроком на 12 месяцев со дня покупки.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        <span>Можно ли оформить товар в рассрочку?</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        Конечно! Вы можете выбрать способ оплаты "Kaspi QR" при оформлении, и наш менеджер отправит вам удаленный счет для оформления стандартной рассрочки или Kaspi Red.
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <div id="page-about" class="page">
+        <div class="container" style="max-width: 1000px; margin: 0 auto;">
+            <h2 class="section-title">О компании DARA Electronics</h2>
+            
+            <div class="about-hero">
+                <p class="about-text">
+                    Добро пожаловать в <strong>DARA Electronics</strong>! Мы динамично развивающаяся технологическая компания, основанная амбициозной командой разработчиков. Наша глобальная миссия — внедрять передовые инженерные решения и делать умные цифровые технологии максимально доступными и полезными для каждого жителя Казахстана.
+                </p>
+                <p class="about-text">
+                    Мы самостоятельно проектируем интерфейсы, тщательно следим за качеством сборки комплектующих и создаем экосистему устройств, которая легко интегрируется в повседневную жизнь современного человека.
+                </p>
+            </div>
+
+            <div class="team-section">
+                <h3 class="section-title" style="font-size: 1.5rem;">Наша команда</h3>
+                <p style="color: #64748b; margin-bottom: 20px;">Мы — студенты группы <strong>202-24</strong>, создавшие этот проект с нуля:</p>
+                
+                <div class="team-grid">
+                    <div class="team-card">
+                        <div class="team-avatar"><i class="fas fa-code"></i></div>
+                        <h4>Дамир</h4>
+                        <p>Группа 202-24</p>
+                    </div>
+                    <div class="team-card">
+                        <div class="team-avatar"><i class="fas fa-paint-brush"></i></div>
+                        <h4>Анар</h4>
+                        <p>Группа 202-24</p>
+                    </div>
+                    <div class="team-card">
+                        <div class="team-avatar"><i class="fas fa-database"></i></div>
+                        <h4>Ринат</h4>
+                        <p>Группа 202-24</p>
+                    </div>
+                    <div class="team-card">
+                        <div class="team-avatar"><i class="fas fa-laptop-code"></i></div>
+                        <h4>Аят</h4>
+                        <p>Группа 202-24</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="contact-block">
+                <h3 style="margin-bottom: 10px; font-size: 1.3rem;">Связаться с нами</h3>
+                <p style="color: #64748b;">Возникли вопросы по заказам или сотрудничеству? Мы на связи:</p>
+                <div class="contact-links">
+                    <a href="https://instagram.com/n_vud.zi" target="_blank" class="contact-item-link insta-link">
+                        <i class="fab fa-instagram" style="color: #e1306c;"></i> Instagram: @n_vud.zi
+                    </a>
+                    <a href="tel:+77789249246" class="contact-item-link phone-link">
+                        <i class="fas fa-phone-alt" style="color: #2563eb;"></i> Тел: +7 (778) 924-92-46
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="cart-panel" id="cartPanel">
+        <h2 style="margin-bottom: 20px;">Корзина</h2>
+        <div id="cartItems" style="flex-grow: 1; overflow-y: auto;">
+            <p style="color: #999; text-align: center;">Пусто</p>
+        </div>
+        <div style="font-size: 1.2rem; font-weight: bold; margin: 20px 0;">
+            Итого: <span id="totalSum">0</span> ₸
+        </div>
+        <button class="add-btn" style="background: var(--primary);" onclick="openCheckout()">Оформить заказ</button>
+        <button class="add-btn" style="margin-top: 10px; background: #eee; color: #333;" onclick="toggleCart()">Закрыть</button>
+    </div>
+
+    <div class="modal-overlay" id="detailsModal">
+        <div class="modal-content">
+            <span class="close-x" onclick="closeDetails()">&times;</span>
+            <h2 id="modalProdName" style="margin-bottom: 15px; font-size: 1.5rem;"></h2>
+            <img id="modalProdImg" src="" class="details-img" alt="">
+            
+            <h4 style="font-size: 1rem;">Технические характеристики:</h4>
+            <div id="modalProdSpecs" class="details-props"></div>
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
+                <div>
+                    <span style="font-size: 0.9rem; color:#64748b;">Цена:</span>
+                    <div id="modalProdPrice" style="font-size: 1.5rem; font-weight: bold; color: var(--primary);"></div>
+                </div>
+                <button id="modalAddBtn" class="add-btn" style="width: auto; padding: 12px 30px;">В корзину</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="checkoutModal">
+        <div class="modal-content">
+            <span class="close-x" onclick="closeCheckout()">&times;</span>
+            <h2 style="margin-bottom:20px;">Оформление заказа</h2>
+            <form id="orderForm">
+                <div class="form-group">
+                    <label>Имя</label>
+                    <input type="text" id="userName" required placeholder="Дамир">
+                </div>
+                <div class="form-group">
+                    <label>E-mail (для чека)</label>
+                    <input type="email" id="userEmail" required placeholder="example@mail.com">
+                </div>
+                <div class="form-group">
+                    <label>Способ оплаты</label>
+                    <select id="paymentMethod" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; background: white;">
+                        <option value="Kaspi QR">Kaspi QR / Перевод</option>
+                        <option value="Карта">Банковская карта</option>
+                        <option value="Наличные">Наличными при получении</option>
+                    </select>
+                </div>
+                <div class="total-box">
+                    Сумма: <span id="finalSum">0</span> ₸
+                </div>
+                <button type="submit" class="btn-main btn-success">Подтвердить заказ</button>
+            </form>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-contacts">
+            <a href="https://instagram.com/n_vud.zi" target="_blank"><i class="fab fa-instagram"></i> @n_vud.zi</a>
+            <a href="tel:+77789249246"><i class="fas fa-phone-alt"></i> +7 (778) 924-92-46</a>
+        </div>
+        <p>&copy; 2026 DARA Electronics. Группа 202-24</p>
+    </footer>
+
+    <script>
+        const products = [
+            { 
+                id: 1, 
+                name: 'Смартфон DARA Phone Ultra', 
+                price: 320000, 
+                img: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=500',
+                colors: [
+                    { name: 'Космический серый', hex: '#334155' },
+                    { name: 'Полярный белый', hex: '#cbd5e1' },
+                    { name: 'Неоновый синий', hex: '#2563eb' }
+                ],
+                specs: { 'Экран': '6.7" AMOLED, 120 Гц', 'Процессор': 'DARA Core X1', 'Память': '256 ГБ', 'Батарея': '5000 мАч' }
+            },
+            { 
+                id: 2, 
+                name: 'Наушники DARA Air Buds', 
+                price: 45000, 
+                img: 'https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=500',
+                colors: [
+                    { name: 'Глянцевый белый', hex: '#f8fafc' },
+                    { name: 'Матовый черный', hex: '#0f172a' }
+                ],
+                specs: { 'Тип': 'Беспроводные внутриканальные', 'Шумоподавление': 'Активное ANC', 'Время работы': 'до 30 часов', 'Влагозащита': 'IPX4' }
+            },
+            { 
+                id: 3, 
+                name: 'Ноутбук DARA Book Pro', 
+                price: 680000, 
+                img: 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=500',
+                colors: [
+                    { name: 'Серебристый', hex: '#94a3b8' },
+                    { name: 'Графит', hex: '#1e293b' }
+                ],
+                specs: { 'Экран': '15.6" IPS 2K', 'Процессор': 'Intel Core i7 (DARA Edition)', 'ОЗУ': '16 ГБ DDR5', 'SSD': '1 ТБ NVMe' }
+            },
+            { 
+                id: 4, 
+                name: 'Умные часы DARA Watch Ultra', 
+                price: 185000, 
+                img: 'https://images.unsplash.com/photo-1542496658-e33a6d0d50f6?w=500',
+                colors: [
+                    { name: 'Титановый оранж', hex: '#f97316' },
+                    { name: 'Угольно-черный', hex: '#111827' }
+                ],
+                specs: { 'Корпус': 'Авиационный титан', 'Дисплей': 'OLED Always-On', 'Датчики': 'Пульс, ЭКГ, Кислород', 'Автономность': 'До 7 дней' }
+            },
+            { 
+                id: 5, 
+                name: 'Планшет DARA Pad Tab', 
+                price: 210000, 
+                img: 'https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=500',
+                colors: [
+                    { name: 'Серый космос', hex: '#475569' },
+                    { name: 'Изумрудный', hex: '#065f46' }
+                ],
+                specs: { 'Экран': '11" Liquid Retina', 'Процессор': 'DARA Chip T2', 'Память': '128 ГБ', 'Поддержка стилуса': 'Да' }
+            },
+            { 
+                id: 6, 
+                name: 'Повербанк DARA PowerCore', 
+                price: 19000, 
+                img: 'https://ir.ozone.ru/s3/multimedia-1-b/7588176491.jpg',
+                colors: [
+                    { name: 'Черный', hex: '#1e293b' },
+                    { name: 'Белый', hex: '#f1f5f9' },
+                    { name: 'Красный', hex: '#ef4444' }
+                ],
+                specs: { 'Емкость': '20000 мАч', 'Макс. мощность': '65 Вт QuickCharge', 'Выходы': '2х USB-C, 1x USB-A', 'Вес': '380 г' }
+            }
+        ];
+
+        let selectedColors = {};
+        products.forEach(p => { selectedColors[p.id] = p.colors[0].name; });
+
+        let cart = JSON.parse(localStorage.getItem('dar_shop_cart')) || [];
+
+        function switchPage(pageId) {
+            document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+            document.querySelectorAll('.nav-links a').forEach(link => link.classList.remove('active'));
+            
+            document.getElementById(`page-${pageId}`).classList.add('active');
+            document.getElementById(`nav-${pageId}`).classList.add('active');
+            window.scrollTo({top: 0, behavior: 'smooth'});
+        }
+
+        function renderCards() {
+            const grid = document.getElementById('main-grid');
+            if (!grid) return;
+
+            grid.innerHTML = products.map(p => {
+                const colorDots = p.colors.map((c, idx) => `
+                    <div class="color-dot ${idx === 0 ? 'active' : ''}" 
+                         style="background-color: ${c.hex};" 
+                         title="${c.name}"
+                         onclick="selectColor(event, ${p.id}, '${c.name}', this)">
+                    </div>
+                `).join('');
+
+                return `
+                    <div class="product-card" onclick="openDetails(${p.id})">
+                        <img src="${p.img}" alt="${p.name}">
+                        <h3>${p.name}</h3>
+                        <div class="color-selector" onclick="event.stopPropagation();">
+                            <span class="color-label">Цвет:</span>
+                            ${colorDots}
+                        </div>
+                        <p class="price">${p.price.toLocaleString()} ₸</p>
+                        <button class="add-btn" onclick="event.stopPropagation(); addToCart(${p.id})">В корзину</button>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function selectColor(event, prodId, colorName, element) {
+            selectedColors[prodId] = colorName;
+            const parent = element.parentElement;
+            parent.querySelectorAll('.color-dot').forEach(dot => dot.classList.remove('active'));
+            element.classList.add('active');
+        }
+
+        function saveCart() {
+            localStorage.setItem('dar_shop_cart', JSON.stringify(cart));
+        }
+
+        function addToCart(id) {
+            const p = products.find(item => item.id === id);
+            if (!p) return;
+            
+            const cartItem = { ...p, selectedColor: selectedColors[id] };
+            cart.push(cartItem);
+            saveCart();
+            updateCartUI();
+        }
+
+        function removeFromCart(index) {
+            cart.splice(index, 1);
+            saveCart();
+            updateCartUI();
+        }
+
+        function updateCartUI() {
+            document.getElementById('cart-count').innerText = cart.length;
+            const list = document.getElementById('cartItems');
+            const total = cart.reduce((sum, p) => sum + p.price, 0);
+            
+            if (cart.length === 0) {
+                list.innerHTML = '<p style="text-align: center; color: #999;">Пусто</p>';
+            } else {
+                list.innerHTML = cart.map((p, idx) => `
+                    <div class="cart-item">
+                        <div class="cart-item-info">
+                            <span class="cart-item-name">${p.name}</span>
+                            <span class="cart-item-color">Цвет: ${p.selectedColor || 'Стандарт'}</span>
+                            <span class="cart-item-price">${p.price.toLocaleString()} ₸</span>
+                        </div>
+                        <button class="cart-item-remove" onclick="removeFromCart(${idx})">&times;</button>
+                    </div>
+                `).join('');
+            }
+            
+            document.getElementById('totalSum').innerText = total.toLocaleString();
+            document.getElementById('finalSum').innerText = total.toLocaleString(); 
+        }
+
+        function toggleCart() {
+            document.getElementById('cartPanel').classList.toggle('active');
+        }
+
+        function openDetails(id) {
+            const p = products.find(item => item.id === id);
+            if (!p) return;
+
+            document.getElementById('modalProdName').innerText = p.name;
+            document.getElementById('modalProdImg').src = p.img;
+            document.getElementById('modalProdPrice').innerText = `${p.price.toLocaleString()} ₸`;
+
+            let specsHtml = '';
+            for (let key in p.specs) {
+                specsHtml += `
+                    <div class="prop-row">
+                        <span class="prop-label">${key}</span>
+                        <span class="prop-value">${p.specs[key]}</span>
+                    </div>
+                `;
+            }
+            document.getElementById('modalProdSpecs').innerHTML = specsHtml;
+
+            const addBtn = document.getElementById('modalAddBtn');
+            addBtn.onclick = () => {
+                addToCart(p.id);
+                closeDetails();
+            };
+
+            document.getElementById('detailsModal').style.display = 'flex';
+        }
+
+        function closeDetails() {
+            document.getElementById('detailsModal').style.display = 'none';
+        }
+
+        // ОФОРМЛЕНИЕ ЗАКАЗА
+        function openCheckout() {
+            if (cart.length === 0) return alert("Корзина пуста");
+            document.getElementById('checkoutModal').style.display = 'flex';
+        }
+
+        function closeCheckout() {
+            document.getElementById('checkoutModal').style.display = 'none';
+        }
+
+        // ЛОГИКА FAQ
+        function toggleFaq(element) {
+            const item = element.parentElement;
+            item.classList.toggle('active');
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            renderCards();
+            updateCartUI();
+            
+            window.addEventListener('click', (e) => {
+                if(e.target === document.getElementById('checkoutModal')) closeCheckout();
+                if(e.target === document.getElementById('detailsModal')) closeDetails();
+            });
+        });
+
+        document.getElementById('orderForm').onsubmit = (e) => {
+            e.preventDefault();
+            const name = document.getElementById('userName').value;
+            alert(`Спасибо, ${name}! Заказ успешно оформлен. Мы свяжемся с вами в ближайшее время.`);
+            
+            cart = [];
+            saveCart();
+            updateCartUI();
+            closeCheckout();
+            
+            if(document.getElementById('cartPanel').classList.contains('active')) {
+                toggleCart();
+            }
+        };
+    </script>
+</body>
+</html>
